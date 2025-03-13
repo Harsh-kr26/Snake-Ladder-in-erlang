@@ -26,15 +26,15 @@ get_next_moves(Current, Steps, Board, N, Dist) ->
 check_move(Next, Steps, _Board, N, _Dist) when Next > N * N -> 
     [];
 check_move(Next, Steps, Board, N, Dist) ->
-    Row = (Next - 1) div 10,
-    Col = (Next - 1) rem 10,
+    Row = (Next - 1) div N,
+    Col = (Next - 1) rem N,
 
     AdjustedCol = case Row rem 2 of
         1 -> N - 1 - Col;
         0 -> Col
     end,
     AdjustedRow = N - 1 - Row,
-
+    %io:format("adjrow value is : ~p", [AdjustedRow]),
     BoardRow = lists:nth(AdjustedRow + 1, Board),
     FinalNext = case lists:nth(AdjustedCol + 1, BoardRow) of
         -1 -> Next;
@@ -42,7 +42,11 @@ check_move(Next, Steps, Board, N, Dist) ->
     end,
     case maps:find(FinalNext, Dist) of
         error -> [{FinalNext, Steps + 1}];
-        {ok, _} -> []
+        {ok, OldSteps} ->
+            case Steps + 1 < OldSteps of
+                true -> [{FinalNext, Steps + 1}];
+                false -> []
+            end 
     end.
 
 update_distances(Moves, Dist) ->
